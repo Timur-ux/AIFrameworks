@@ -7,27 +7,53 @@
 
 ## Модель регрессии(логистической)
 
-Моя реализация данной модели лежит в файле src.regression, я использовал стандартную вариант модели с сигмоидной функцией активации и стохастическим градиентным спуском в качестве алгоритма обучения
+Моя реализация данной модели лежит в файле src.regression, я использовал стандартную вариант модели с сигмоидной функцией активации и стохастическим градиентным спуском в качестве алгоритма обучения. Из оптимизаций я использовал L2 регуляцию параметров модели и сумму квадратов  в качестве минимизируемой функции стоимости. Не использовал разбиение датасета на пакеты(mini-batches)
 """
 
 # %%
-from src.Model import *
-import numpy as np
-class Regression(Model):
-    def __init__(self, nFeatures: int, lr: float = 1e-3, epochs: int = 100) -> None: 
-        self.nFeatures: int = nFeatures
-        self.lr: float = lr
-        self.w = np.random.rand(nFeatures)
-        self.bias = np.random.rand()
+from src.regression import *
+from src.datasets import getRegressionDataset
+defaultDataset, extendedDataset = getRegressionDataset()
+# %%
+import matplotlib.pyplot as plt
+model = Regression(defaultDataset.xTrain.shape[1], lr=1e-2, epochs=2000, lmbda=1e-4)
+model.fit(defaultDataset.xTrain, defaultDataset.yTrain)
+fig, ax = plt.subplots()
+ax.plot(model.costs)
+ax.set_title("Изменения функции стоимости")
+plt.show()
+# %% [md]
+"""
+Посчитаем точность предсказания на базовом наборе данных
+"""
+# %%
+from sklearn import metrics
 
-    @staticmethod
-    def sigmoid(z: float) -> float:
-        return 1.0 / (1.0 + np.exp(-z))
+yPredicted = model.predict(defaultDataset.xTest)
+print(f"Regression accuracy: {metrics.accuracy_score(defaultDataset.yTest, yPredicted)}")
 
-    @staticmethod
-    def sigmoidPrime(z: float) -> float:
-        return Regression.sigmoid(z) * (1 - Regression.sigmoid(z))
+# %% [md]
+"""
+Посчитаем точность предсказания на расширенном наборе данных
+"""
+# %%
 
-    def fit(self, x: pd.DataFrame, y: pd.Series) -> None:
-        
+model = Regression(extendedDataset.xTrain.shape[1], lr=1e-2, epochs=2000, lmbda=1e-4)
+model.fit(extendedDataset.xTrain, extendedDataset.yTrain)
+fig, ax = plt.subplots()
+ax.plot(model.costs)
+ax.set_title("Изменения функции стоимости")
+plt.show()
 
+from sklearn import metrics
+
+yPredicted = model.predict(extendedDataset.xTest)
+print(f"Regression accuracy: {metrics.accuracy_score(extendedDataset.yTest, yPredicted)}")
+# %% [md]
+"""
+# Вывод
+
+Почти получилось достигнуть бейзлайна оригинальной реализации из sklearn, предполагаю, что там используется не градиентный метод или более оптимизированная его версия.
+
+Введение доп признаков дало заментый прирост точности(acccuracy)
+"""

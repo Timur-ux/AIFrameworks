@@ -16,10 +16,11 @@ class Dataset:
 #
 # @return tuple of source dataset and dataset with new features
 def getRegressionDataset(testSize: float = 0.3) -> Tuple[Dataset, Dataset]:
-    reg_df = pd.read_csv("../datasets/weight-height.csv")
+    reg_df = pd.read_csv("./datasets/weight-height.csv")
     x = reg_df[["Height", "Weight"]]
     y = reg_df['Gender']
     encoder = preprocessing.LabelEncoder()
+    encoder.fit(y)
     y = pd.Series(encoder.transform(y))
     xTrain, xTest, yTrain, yTest = model_selection.train_test_split(
         x, y, test_size=testSize, random_state=51)
@@ -28,7 +29,6 @@ def getRegressionDataset(testSize: float = 0.3) -> Tuple[Dataset, Dataset]:
     reg_df["IBM"] = reg_df['Weight'] / reg_df["Height"]
     reg_df = reg_df.dropna()
     x = reg_df[["Height", "Weight", "IBM"]]
-    y = reg_df['Gender']
     xTrain, xTest, yTrain, yTest = model_selection.train_test_split(
         x, y, test_size=testSize, random_state=51)
     extendedDataset = Dataset(xTrain, xTest, yTrain, yTest)
