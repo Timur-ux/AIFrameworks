@@ -2,6 +2,8 @@ import pandas as pd
 from sklearn import preprocessing, model_selection
 from pandas.util.version import Tuple
 
+EPS = 1e-5
+
 class Dataset:
     def __init__(self, xTrain: pd.DataFrame, xTest: pd.DataFrame, yTrain: pd.Series, yTest: pd.Series) -> None: 
         self.xTrain: pd.DataFrame = xTrain
@@ -26,7 +28,7 @@ def getRegressionDataset(testSize: float = 0.3) -> Tuple[Dataset, Dataset]:
         x, y, test_size=testSize, random_state=51)
     defaultDataset = Dataset(xTrain, xTest, yTrain, yTest)
 
-    reg_df["IBM"] = reg_df['Weight'] / reg_df["Height"]
+    reg_df["IBM"] = reg_df['Weight'] / (reg_df["Height"] + EPS)
     reg_df = reg_df.dropna()
     x = reg_df[["Height", "Weight", "IBM"]]
     xTrain, xTest, yTrain, yTest = model_selection.train_test_split(
@@ -61,9 +63,9 @@ def getClassificationDataset(testSize: float = 0.3) -> Tuple[Dataset, Dataset]:
     class_df["Odd_diff"] = class_df['Odd_1'] - class_df['Odd_2']
     class_df["Pts_diff"] = class_df['Pts_1'] - class_df['Pts_2']
 
-    class_df["Rank_ratio"] = class_df['Rank_1'] / class_df['Rank_2']
-    class_df["Odd_ratio"] = class_df['Odd_1'] / class_df['Odd_2']
-    class_df["Pts_ratio"] = class_df['Pts_1'] / class_df['Pts_2']
+    class_df["Rank_ratio"] = class_df['Rank_1'] / (class_df['Rank_2'] + EPS)
+    class_df["Odd_ratio"] = class_df['Odd_1'] / (class_df['Odd_2'] + EPS)
+    class_df["Pts_ratio"] = class_df['Pts_1'] / (class_df['Pts_2'] + EPS)
     class_df = class_df.dropna()
 
     x = class_df[["Rank_1", "Rank_2", "Odd_1", "Odd_2", "Pts_1", "Pts_2", "Rank_diff", "Odd_diff", "Pts_diff", "Rank_ratio", "Odd_ratio", "Pts_ratio"]]

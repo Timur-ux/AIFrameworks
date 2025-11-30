@@ -32,9 +32,11 @@ class Regression(Model):
         x_, y_ = Regression.normalize(x_), Regression.normalize(y_)
         for epoch in range(self.epochs):
             wb = np.concat([self.w, [self.bias]])
-            # forward
+            # Проход вперед
             a = x_ @ wb
             z = Regression.sigmoid(a)
+
+            # Проход назад
             zPrime = Regression.sigmoidPrime(a)
 
             primeFactor = np.sum(2 * (z - y_) * zPrime, axis=0) / z.shape[0] 

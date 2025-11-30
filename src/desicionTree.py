@@ -10,8 +10,8 @@ class DecisionTree(Model):
             self.value = None
             self.left = None
             self.right = None
-            assert currentDepth is not None and maxDepth is not None
-            if currentDepth >= maxDepth:
+            currentEntropy = self.entropy(y)
+            if currentDepth >= maxDepth or currentEntropy == 0:
                 self.isLeaf = True
                 uniques = y.unique()
                 maxCount = -1
@@ -20,10 +20,6 @@ class DecisionTree(Model):
                     if count > maxCount:
                         self.value = unique
                 return
-
-            assert x is not None and y is not None 
-
-            currentEntropy = self.entropy(y)
 
             # ищем наилучшее разбиение
             maxGain = -1e18
@@ -75,12 +71,10 @@ class DecisionTree(Model):
     def split(cls, x: pd.DataFrame, y: pd.Series, currentDepth: int, maxDepth: int) -> Node:
         node = cls.Node(x, y, currentDepth, maxDepth)
 
-        if currentDepth < maxDepth:
+        if currentDepth < maxDepth and not node.isLeaf:
             criteria = x[node.column] < node.value
             node.left = cls.split(x[criteria], y[criteria], currentDepth + 1, maxDepth)
             node.right = cls.split(x[~criteria], y[~criteria], currentDepth + 1, maxDepth)
-            if node.left.isLeaf and node.left.value == node.right.value:
-                node.right.value = 1 - node.right.value
 
         return node
 
